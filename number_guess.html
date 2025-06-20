@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>数字猜猜猜</title>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Press Start 2P', 'Courier New', monospace;
+      background-color: #1a1a1a; /* Dark background */
+      color: #0f0; /* Green retro text */
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 20px;
+      text-align: center;
+      text-shadow: 0 0 5px #0f0;
+    }
+    .container {
+      background-color: #000;
+      padding: 20px 30px;
+      border: 4px solid #0f0;
+      box-shadow: 0 0 20px rgba(0, 255, 0, 0.3);
+      width: 90%;
+      max-width: 500px;
+    }
+    h1 {
+      font-size: 1.8rem;
+      margin-bottom: 20px;
+    }
+    p {
+      margin-bottom: 15px;
+      line-height: 1.6;
+      font-size: 0.9rem;
+    }
+    .input-area label {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 1rem;
+    }
+    input[type='number'] {
+      width: 100px;
+      padding: 10px;
+      margin-bottom: 15px;
+      border: 2px solid #0f0;
+      background-color: #111;
+      color: #0f0;
+      font-family: inherit;
+      font-size: 1.2rem;
+      text-align: center;
+      -moz-appearance: textfield; /* Firefox */
+    }
+    input[type='number']::-webkit-outer-spin-button,
+    input[type='number']::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+    button {
+      background: #111;
+      border: 3px solid #0f0;
+      color: #0f0;
+      padding: 10px 20px;
+      font-family: inherit;
+      font-size: 1rem;
+      cursor: pointer;
+      margin: 5px;
+      transition: background 0.2s, color 0.2s;
+    }
+    button:hover {
+      background: #0f0;
+      color: #000;
+    }
+    button:disabled {
+      border-color: #555;
+      color: #555;
+      cursor: not-allowed;
+    }
+    #play-again-btn {
+      display: none; /* Initially hidden */
+    }
+    .feedback {
+      margin-top: 20px;
+      font-size: 1.1rem;
+      min-height: 30px; /* Prevent layout shift */
+    }
+    .attempts {
+      margin-top: 10px;
+      font-size: 0.9rem;
+      color: #ff0; /* Yellow for attempts */
+    }
+    .back-link {
+      display: inline-block;
+      margin-top: 30px;
+      padding: 8px 15px;
+      border: 2px solid #f00; /* Red border for back link */
+      color: #f00;
+      text-decoration: none;
+      font-size: 0.9rem;
+      transition: background .2s, color .2s;
+    }
+    .back-link:hover {
+      background: #f00;
+      color: #000;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>数字猜猜猜!</h1>
+    <p>我想了一个 1 到 100 之间的数字。你能在 10 次以内猜中吗？</p>
+
+    <div class="input-area">
+      <label for="guess-input">输入你的猜测:</label>
+      <input type="number" id="guess-input" min="1" max="100">
+    </div>
+
+    <button id="submit-guess-btn">提交猜测</button>
+    <button id="play-again-btn">再玩一次</button>
+
+    <div class="feedback" id="feedback-text"></div>
+    <div class="attempts" id="attempts-text"></div>
+  </div>
+  <a href="index.html" class="back-link">← 返回相册</a>
+
+  <script>
+    const guessInput = document.getElementById('guess-input');
+    const submitGuessBtn = document.getElementById('submit-guess-btn');
+    const playAgainBtn = document.getElementById('play-again-btn');
+    const feedbackText = document.getElementById('feedback-text');
+    const attemptsText = document.getElementById('attempts-text');
+
+    let secretNumber;
+    let attempts;
+    const maxAttempts = 10;
+
+    function gameInit() {
+      secretNumber = Math.floor(Math.random() * 100) + 1;
+      attempts = 0;
+      feedbackText.textContent = '开始猜吧!';
+      attemptsText.textContent = `剩余尝试次数: ${maxAttempts - attempts}`;
+      guessInput.value = '';
+      guessInput.disabled = false;
+      submitGuessBtn.disabled = false;
+      playAgainBtn.style.display = 'none';
+      guessInput.focus();
+    }
+
+    function handleGuess() {
+      const playerGuess = parseInt(guessInput.value);
+
+      if (isNaN(playerGuess) || playerGuess < 1 || playerGuess > 100) {
+        feedbackText.textContent = '请输入 1 到 100 之间的有效数字!';
+        return;
+      }
+
+      attempts++;
+      attemptsText.textContent = `剩余尝试次数: ${maxAttempts - attempts}`;
+
+      if (playerGuess === secretNumber) {
+        feedbackText.textContent = \`恭喜! 你在 ${attempts} 次尝试后猜中了数字 ${secretNumber}!\`;
+        endGame();
+      } else if (attempts >= maxAttempts) {
+        feedbackText.textContent = \`游戏结束! 你没有猜中。秘密数字是 ${secretNumber}.\`;
+        endGame();
+      } else if (playerGuess < secretNumber) {
+        feedbackText.textContent = '太低了! 再试一次.';
+      } else {
+        feedbackText.textContent = '太高了! 再试一次.';
+      }
+      guessInput.value = '';
+      guessInput.focus();
+    }
+
+    function endGame() {
+      guessInput.disabled = true;
+      submitGuessBtn.disabled = true;
+      playAgainBtn.style.display = 'inline-block';
+    }
+
+    submitGuessBtn.addEventListener('click', handleGuess);
+    guessInput.addEventListener('keypress', function(event) {
+      if (event.key === 'Enter') {
+        event.preventDefault(); // Prevent form submission if it were in a form
+        handleGuess();
+      }
+    });
+    playAgainBtn.addEventListener('click', gameInit);
+
+    // Initialize the game
+    gameInit();
+  </script>
+</body>
+</html>

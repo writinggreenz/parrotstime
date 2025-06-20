@@ -113,12 +113,12 @@
   <a id="back" href="index.html">← 返回相册</a>
 
   <script>
-    /* ===== 配置 ===== */
-    const config = {
+    /* ===== 配置 (将在initializeGrid中动态设置) ===== */
+    let config = {
       rows: 40,
       cols: 60,
       cellSize: 15,
-      speed: 200,
+      speed: 200, // Default speed, can be changed by slider
     };
 
     /* ===== 状态 ===== */
@@ -141,9 +141,28 @@
 
     /* ===== 初始化网格 ===== */
     function initializeGrid() {
+      // Dynamically set config based on screen size
+      if (window.innerWidth < 768) {
+        config.cellSize = 10;
+        config.rows = 30;
+        // Adjust cols to fit screen width, considering some padding/margin around grid.
+        // Assuming body padding is 20px on each side, total 40px.
+        // Grid container itself might have border. Let's aim for slightly less than full width.
+        const containerPadding = 40; // Approximate total horizontal padding for body/container elements
+        const availableWidth = window.innerWidth - containerPadding;
+        config.cols = Math.floor(availableWidth / config.cellSize);
+      } else {
+        config.cellSize = 15;
+        config.rows = 40;
+        config.cols = 60;
+      }
+
+      // Update speed from slider in case it was set before init
+      config.speed = +speedSlider.value;
+
       // 设置 CSS Grid 模板列
       gridContainer.style.gridTemplateColumns = `repeat(${config.cols}, ${config.cellSize}px)`;
-      gridContainer.innerHTML = "";
+      gridContainer.innerHTML = ""; // Clear previous grid elements
       gridContainer.style.setProperty("--cell-size", config.cellSize + "px");
 
       grid = Array.from({ length: config.rows }, () => Array(config.cols).fill(0));
@@ -155,12 +174,37 @@
           div.className = "cell";
           div.dataset.row = r;
           div.dataset.col = c;
+
+          // Mouse listeners
           div.addEventListener("mousedown", () => {
             isMouseDown = true;
             toggleCell(r, c);
           });
           div.addEventListener("mouseenter", () => {
             if (isMouseDown) toggleCell(r, c);
+          });
+
+          // Touch listeners
+          div.addEventListener("touchstart", (e) => {
+            e.preventDefault(); // Prevent mouse event emulation & page scrolling
+            isMouseDown = true;
+            toggleCell(r, c);
+          });
+          div.addEventListener("touchmove", (e) => {
+            e.preventDefault(); // Prevent page scrolling while drawing
+            if (isMouseDown) {
+              const touch = e.touches[0];
+              // Determine cell from touch coordinates
+              const targetElement = document.elementFromPoint(touch.clientX, touch.clientY);
+              if (targetElement && targetElement.classList.contains('cell') && targetElement.dataset.row !== undefined) {
+                const rTouch = parseInt(targetElement.dataset.row);
+                const cTouch = parseInt(targetElement.dataset.col);
+                // Check if rTouch and cTouch are valid, though elementFromPoint should target valid cells if grid is set up.
+                if (rTouch >= 0 && rTouch < config.rows && cTouch >=0 && cTouch < config.cols) {
+                   toggleCell(rTouch, cTouch);
+                }
+              }
+            }
           });
           gridContainer.appendChild(div);
         }
@@ -354,7 +398,10 @@
       }
     };
 
-    document.addEventListener("mouseup", () => (isMouseDown = false));
+    const endDrawing = () => { isMouseDown = false; };
+    document.addEventListener("mouseup", endDrawing);
+    document.addEventListener("touchend", endDrawing);
+    document.addEventListener("touchcancel", endDrawing);
 
     /* ===== 启动 ===== */
     initializeGrid();

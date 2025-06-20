@@ -316,27 +316,27 @@
         <div class="info-section">
           <div class="info-title">游戏控制</div>
           <div class="controls">
-            <div class="control-btn">
+            <div class="control-btn" id="ctrl-left">
               <div class="key-icon">←</div>
               <span>左移</span>
             </div>
-            <div class="control-btn">
+            <div class="control-btn" id="ctrl-right">
               <div class="key-icon">→</div>
               <span>右移</span>
             </div>
-            <div class="control-btn">
+            <div class="control-btn" id="ctrl-down">
               <div class="key-icon">↓</div>
               <span>下移</span>
             </div>
-            <div class="control-btn">
+            <div class="control-btn" id="ctrl-rotate">
               <div class="key-icon">↑</div>
               <span>旋转</span>
             </div>
-            <div class="control-btn">
+            <div class="control-btn" id="ctrl-harddrop">
               <div class="key-icon">⤓</div>
               <span>硬降</span>
             </div>
-            <div class="control-btn">
+            <div class="control-btn" id="ctrl-pause-alt">
               <div class="key-icon">P</div>
               <span>暂停</span>
             </div>
@@ -398,6 +398,14 @@
   const pauseBtn = document.getElementById('pause-btn');
   const restartBtn = document.getElementById('restart-btn');
   const backBtn = document.getElementById('back-btn');
+
+  // On-screen controls
+  const ctrlLeftBtn = document.getElementById('ctrl-left');
+  const ctrlRightBtn = document.getElementById('ctrl-right');
+  const ctrlDownBtn = document.getElementById('ctrl-down');
+  const ctrlRotateBtn = document.getElementById('ctrl-rotate');
+  const ctrlHardDropBtn = document.getElementById('ctrl-harddrop');
+  const ctrlPauseAltBtn = document.getElementById('ctrl-pause-alt');
   
   // 游戏状态
   let board = [];
@@ -709,23 +717,39 @@
   
   // 游戏主循环
   function gameLoop(time) {
+    if (gamePaused) {
+      if (!gameOver) { // Only show PAUSED if not game over
+        // Draw current board state first
+        draw();
+        // Then overlay PAUSED message
+        boardCtx.fillStyle = 'rgba(0, 0, 0, 0.6)';
+        boardCtx.fillRect(0, 0, boardCtx.canvas.width, boardCtx.canvas.height);
+        boardCtx.fillStyle = '#fff';
+        boardCtx.font = '30px "Press Start 2P", monospace';
+        boardCtx.textAlign = 'center';
+        boardCtx.fillText('PAUSED', boardCtx.canvas.width / 2, boardCtx.canvas.height / 2);
+        boardCtx.textAlign = 'left'; // Reset alignment
+      }
+      requestAnimationFrame(gameLoop); // Keep the loop alive to respond to unpause
+      return; // Don't execute game logic or normal draw
+    }
+
+    // If not paused:
     if (!lastTime) lastTime = time;
     const delta = time - lastTime;
     lastTime = time;
     
-    if (!gamePaused) {
-      dropCounter += delta;
-      
-      // 自动下落
-      if (dropCounter > dropInterval) {
-        movePiece(0, 1);
-        dropCounter = 0;
-      }
-      
-      // 绘制游戏
-      draw();
+    dropCounter += delta;
+
+    // 自动下落
+    if (dropCounter > dropInterval) {
+      movePiece(0, 1);
+      dropCounter = 0;
     }
     
+    // 绘制游戏
+    draw();
+
     requestAnimationFrame(gameLoop);
   }
   
@@ -776,6 +800,14 @@
   pauseBtn.addEventListener('click', togglePause);
   restartBtn.addEventListener('click', init);
   backBtn.addEventListener('click', goBack);
+
+  // On-screen controls event listeners
+  ctrlLeftBtn.addEventListener('click', () => movePiece(-1, 0));
+  ctrlRightBtn.addEventListener('click', () => movePiece(1, 0));
+  ctrlDownBtn.addEventListener('click', () => movePiece(0, 1));
+  ctrlRotateBtn.addEventListener('click', () => rotatePiece());
+  ctrlHardDropBtn.addEventListener('click', () => hardDrop());
+  ctrlPauseAltBtn.addEventListener('click', () => togglePause());
   
   // 初始化游戏
   init();
