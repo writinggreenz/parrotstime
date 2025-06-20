@@ -2,7 +2,7 @@
 <html lang="zh">
 <head>
   <meta charset="UTF-8">
-  <title>Cool Parrots Gallery</title>
+  <title>鹦鹉雅集 | Elegant Parrot Gallery</title>
   <!-- Lightbox2 样式表（CDN） -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.4/css/lightbox.min.css"/>
   <style>
@@ -21,8 +21,11 @@
     /* Heading Styles */
     h1 {
       color: #ffffff;
-      margin-bottom: 20px;
+      margin-bottom: 40px;
       font-family: 'Georgia', Times, serif;
+      font-weight: normal;
+      letter-spacing: 1px;
+      text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.3);
     }
 
     /* Gallery Container Styles */
@@ -44,6 +47,7 @@
       box-shadow: 0 4px 8px rgba(0,0,0,0.1);
       transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
       cursor: pointer;
+      border: 2px solid rgba(255, 255, 255, 0.6);
     }
     .gallery img:hover {
       transform: scale(1.05);
@@ -52,17 +56,18 @@
 
     /* Horizontal Rule Style */
     hr {
-      margin: 24px auto; /* Centered hr */
+      margin: 50px auto; /* Centered hr */
       width: 80%; /* Reduced width */
       border: 0;
       height: 1px;
-      background-image: linear-gradient(to right, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.75), rgba(255, 255, 255, 0));
+      background-image: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.5), transparent);
     }
 
     /* Footer Link Styles */
     .footer-links {
-      margin-top: 20px;
+      margin-top: 0;
       padding: 10px;
+      margin-bottom: 30px;
     }
     .footer-links a {
       color: #ffffff; /* White links for contrast */
@@ -81,6 +86,13 @@
       }
       h1 {
         font-size: 1.8em; /* Slightly smaller h1 on small screens */
+      }
+    }
+
+    /* Larger screen adjustments */
+    @media (min-width: 768px) {
+      body {
+        padding: 40px;
       }
     }
   </style>
@@ -102,12 +114,7 @@
 
   <hr>
   <p class="footer-links">
-    <a href="snake.html">贪吃蛇</a>
-    <a href="tetris.html">俄罗斯方块</a>
-    <a href="CA.html">元胞自动机</a>
     <a href="CA2.html">小游戏：元胞自动机</a>
-    <a href="number_guess.html">数字猜猜猜</a>
-    <a href="memory_game.html">记忆翻牌</a>
   </p>
 
   <!-- Lightbox2 脚本（CDN） -->
