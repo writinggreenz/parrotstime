@@ -2,19 +2,30 @@
 <html lang="zh">
 <head>
   <meta charset="UTF-8">
-  <title>鹦鹉相册</title>
+  <title>Cool Parrots Gallery</title>
   <!-- Lightbox2 样式表（CDN） -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.4/css/lightbox.min.css"/>
   <style>
+    /* Global Reset */
     * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    /* General Body Styles */
     body {
-      font-family: Arial, sans-serif;
-      background: #f0f8ff;
+      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      background: linear-gradient(to right, #6dd5ed, #2193b0);
       text-align: center;
       padding: 20px;
+      color: #ffffff; /* Default text color for better readability */
     }
-    h1 { color: #228B22; margin-bottom: 20px; }
 
+    /* Heading Styles */
+    h1 {
+      color: #ffffff;
+      margin-bottom: 20px;
+      font-family: 'Georgia', Times, serif;
+    }
+
+    /* Gallery Container Styles */
     .gallery {
       max-width: 960px;
       margin: 0 auto;
@@ -24,20 +35,52 @@
       justify-content: center;
     }
 
+    /* Gallery Image Styles */
     .gallery img {
       height: 200px;
       width: auto;
       max-width: 100%;
       border-radius: 8px;
       box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-      transition: transform 0.2s;
+      transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
       cursor: pointer;
     }
-    .gallery img:hover { transform: scale(1.05); }
+    .gallery img:hover {
+      transform: scale(1.05);
+      box-shadow: 0 8px 16px rgba(0,0,0,0.3);
+    }
 
+    /* Horizontal Rule Style */
+    hr {
+      margin: 24px auto; /* Centered hr */
+      width: 80%; /* Reduced width */
+      border: 0;
+      height: 1px;
+      background-image: linear-gradient(to right, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.75), rgba(255, 255, 255, 0));
+    }
+
+    /* Footer Link Styles */
+    .footer-links {
+      margin-top: 20px;
+      padding: 10px;
+    }
+    .footer-links a {
+      color: #ffffff; /* White links for contrast */
+      text-decoration: none;
+      margin: 0 10px;
+      font-weight: bold;
+    }
+    .footer-links a:hover {
+      text-decoration: underline;
+    }
+
+    /* Responsive Adjustments */
     @media (max-width: 640px) {
       .gallery {
         gap: 12px;
+      }
+      h1 {
+        font-size: 1.8em; /* Slightly smaller h1 on small screens */
       }
     }
   </style>
@@ -57,8 +100,8 @@
     </a>
   </div>
 
-  <hr style="margin:24px 0;">
-  <p>
+  <hr>
+  <p class="footer-links">
     <!--
     <a href="snake.html"  style="margin-right:16px;">贪吃蛇</a>
     <a href="tetris.html">俄罗斯方块</a>
