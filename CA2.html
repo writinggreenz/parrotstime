@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Conway Life · 元胞自动机</title>
+  <!-- 复古像素字体 -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" />
+  <style>
+    /* ========== 主题参数（与 tetris.html 保持一致） ========== */
+    :root {
+      --accent: #0f0;        /* 亮绿色强调色 */
+      --bg:     #000;        /* 黑色背景     */
+      --grid:   #222;        /* 网格线颜色   */
+      --alive:  #0f0;        /* 活细胞颜色   */
+      --dead:   #000;        /* 死细胞颜色   */
+      --size:   5px;        /* 单元格像素   */
+      --cols:   50;          /* 列数         */
+      --rows:   50;          /* 行数         */
+    }
+
+    /* ========== 页面布局 ========== */
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: #fff;
+      font-family: "Press Start 2P", monospace;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+      user-select: none;
+    }
+    h1 { margin-bottom: 12px; }
+
+    /* ====== 网格区域：1px 线条，无空隙 ====== */
+    #grid {
+      display: grid;
+      grid-template-columns: repeat(var(--cols), var(--size));
+      grid-template-rows:    repeat(var(--rows), var(--size));
+      gap: 1px;                 /* 单像素网格线 */
+      background: var(--grid);  /* 线条颜色 */
+      touch-action: auto;       /* 禁用触控缩放 */
+    }
+    .cell {
+      width: var(--size);
+      height: var(--size);
+      background: var(--dead);
+    }
+    .alive { background: var(--alive); }
+
+    /* ====== 控件样式（与 tetris.html 一致） ====== */
+    #controls {
+      margin-top: 16px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+    }
+    button, select, label {
+      font-family: "Press Start 2P", monospace;
+      font-size: 12px;
+      padding: 6px 10px;
+      background: transparent;
+      border: 2px solid var(--accent);
+      color: var(--accent);
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    button:hover, select:hover {
+      background: var(--accent);
+      color: #000;
+    }
+    label { border: none; padding: 0; color: #fff; }
+    input[type="range"] { width: 120px; }
+
+    /* ====== 返回按钮 ====== */
+    #back {
+      margin-top: 20px;
+      font-size: 12px;
+      text-decoration: none;
+      padding: 4px 10px;
+      border: 2px solid var(--accent);
+      border-radius: 6px;
+      color: var(--accent);
+      transition: .2s;
+    }
+    #back:hover {
+      background: var(--accent);
+      color: #000;
+    }
+  </style>
+</head>
+<body>
+  <h1>Conway’s Game of Life</h1>
+  <div id="grid"></div>
+
+  <!-- 控制面板 -->
+  <div id="controls">
+    <button id="start">START</button>
+    <button id="stop">STOP</button>
+    <button id="step">NEXT STEP</button>
+    <button id="clear">CLEAR</button>
+    <button id="random">RANDOM</button>
+    <label>SPEED <input id="speed" type="range" min="50" max="500" step="50" value="100"></label>
+    <select id="pattern">
+      <option value="">EXAMPLE PATTERN</option>
+      <option value="glider">滑翔机</option>
+      <option value="lwss">轻型太空船</option>
+      <option value="pulsar">脉冲星</option>
+      <option value="gun">高斯帕滑翔机枪</option>
+    </select>
+  </div>
+
+  <!-- 返回相册 -->
+  <a id="back" href="index.html">← Back to gallery</a>
+
+  <script>
+    /* ========== 初始化网格 ========== */
+    const cols  = +getComputedStyle(document.documentElement).getPropertyValue('--cols');
+    const rows  = +getComputedStyle(document.documentElement).getPropertyValue('--rows');
+    const grid  = document.getElementById('grid');
+    const cells = [];
+
+    for (let y = 0; y < rows; y++)
+      for (let x = 0; x < cols; x++) {
+        const d = document.createElement('div');
+        d.className = 'cell';
+        d.dataset.x = x;
+        d.dataset.y = y;
+        d.addEventListener('pointerdown', () => d.classList.toggle('alive'));
+        grid.appendChild(d);
+        cells.push(d);
+      }
+
+    const idx = (x, y) => y * cols + x;
+
+    /* ========== 预设模式 ==========
+       坐标均以 (0,0) 为中心；稍后会居中放置  */
+    const PATTERNS = {
+      glider:  [[1,0],[2,1],[0,2],[1,2],[2,2]],
+      lwss:    [[1,0],[2,0],[3,0],[4,0],[0,1],[4,1],[4,2],[0,3],[3,3]],
+      pulsar:  [
+        [-4,-2],[-3,-2],[-2,-2],[2,-2],[3,-2],[4,-2],
+        [-4,2],[-3,2],[-2,2],[2,2],[3,2],[4,2],
+        [-2,-4],[-2,-3],[-2,-2],[-2,2],[-2,3],[-2,4],
+        [2,-4],[2,-3],[2,-2],[2,2],[2,3],[2,4]
+      ],
+      gun: [  /* 高斯帕滑翔机枪(部分缩小版) */
+        [6,0],[6,1],[7,0],[7,1],
+        [4,12],[5,12],[6,12],[3,13],[7,13],[2,14],[8,14],[2,15],[8,15],[5,16],[3,17],[7,17],[4,18],[5,18],[6,18],[5,19],
+        [14,12],[15,12],[16,12],[14,13],[15,13],[16,13],[13,14],[17,14],[12,16],[18,16],[11,17],[19,17],[11,18],[19,18],[14,18],[12,18],[16,18],[14,19],
+        [21,0],[22,0],[21,1],[22,1],[21,2],[22,2],[23,-1],[23,3],
+        [25,-2],[25,-1],[25,3],[25,4],
+        [35,-1],[35,0],[36,-1],[36,0]
+      ]
+    };
+
+    /* ========== 主循环 & 更新 ==========
+       基本规则：
+      - 存活细胞: 若邻居 2 或 3 则存活，否则死亡
+      - 空白细胞: 若邻居正好 3 则出生 */
+    const neighbours = (x, y) => {
+      let n = 0;
+      for (let dy = -1; dy <= 1; dy++)
+        for (let dx = -1; dx <= 1; dx++) {
+          if (dx === 0 && dy === 0) continue;
+          const nx = x + dx, ny = y + dy;
+          if (nx >= 0 && nx < cols && ny >= 0 && ny < rows &&
+              cells[idx(nx, ny)].classList.contains('alive')) n++;
+        }
+      return n;
+    };
+
+    const step = () => {
+      const next = cells.map((c, i) => {
+        const x = i % cols, y = (i / cols) | 0;
+        const alive = c.classList.contains('alive');
+        const n = neighbours(x, y);
+        return alive ? (n === 2 || n === 3) : n === 3;
+      });
+      next.forEach((v, i) => cells[i].classList.toggle('alive', v));
+    };
+
+    /* ========== 控件逻辑 ========== */
+    let speed = 100, running = false, timer;
+    const loop = () => {
+      if (!running) return;
+      step();
+      timer = setTimeout(loop, speed);
+    };
+
+    document.getElementById('start').onclick = () => { if (!running) { running = true; loop(); } };
+    document.getElementById('stop').onclick  = () => { running = false; clearTimeout(timer); };
+    document.getElementById('step').onclick  = () => { if (!running) step(); };
+    document.getElementById('clear').onclick = () => { running = false; clearTimeout(timer); cells.forEach(c=>c.classList.remove('alive')); };
+    document.getElementById('random').onclick= () => { cells.forEach(c=>c.classList.toggle('alive', Math.random() < 0.25)); };
+
+    document.getElementById('speed').oninput = e => { speed = +e.target.value; };
+
+    /* 加载示例模式 */
+    const loadPattern = name => {
+      document.getElementById('clear').click();
+      if (!PATTERNS[name] || PATTERNS[name].length === 0) return;
+      const offsetX = (cols / 2) | 0;
+      const offsetY = (rows / 2) | 0;
+      PATTERNS[name].forEach(([dx, dy]) => {
+        const x = offsetX + dx, y = offsetY + dy;
+        if (x >= 0 && x < cols && y >= 0 && y < rows)
+          cells[idx(x, y)].classList.add('alive');
+      });
+    };
+    document.getElementById('pattern').onchange = e => loadPattern(e.target.value);
+  </script>
+</body>
+</html>

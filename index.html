@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <title>鹦鹉相册</title>
+  <!-- Lightbox2 样式表（CDN） -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.4/css/lightbox.min.css"/>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: Arial, sans-serif;
+      background: #f0f8ff;
+      text-align: center;
+      padding: 20px;
+    }
+    h1 { color: #228B22; margin-bottom: 20px; }
+
+    .gallery {
+      max-width: 960px;
+      margin: 0 auto;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      justify-content: center;
+    }
+
+    .gallery img {
+      height: 200px;
+      width: auto;
+      max-width: 100%;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      transition: transform 0.2s;
+      cursor: pointer;
+    }
+    .gallery img:hover { transform: scale(1.05); }
+
+    @media (max-width: 640px) {
+      .gallery {
+        gap: 12px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1>我的鹦鹉相册</h1>
+
+  <div class="gallery">
+    <a href="images/parrots1.jpg" data-lightbox="parrots" data-title="它们可真会找落脚点">
+      <img src="images/thumbs/parrots1.jpg" alt="它们可真会找落脚点" loading="lazy">
+    </a>
+    <a href="images/parrots2.jpg" data-lightbox="parrots" data-title="鹦鹉时间到">
+      <img src="images/thumbs/parrots2.jpg" alt="鹦鹉时间到" loading="lazy">
+    </a>
+    <a href="images/parrots3.jpg" data-lightbox="parrots" data-title="每天晚上的高难度动作，需要两只鹦鹉在昏暗的环境中小心配合">
+      <img src="images/thumbs/parrots3.jpg" alt="每天晚上的高难度动作，需要两只鹦鹉在昏暗的环境中小心配合" loading="lazy">
+    </a>
+  </div>
+
+  <hr style="margin:24px 0;">
+  <p>
+    <!--
+    <a href="snake.html"  style="margin-right:16px;">贪吃蛇</a>
+    <a href="tetris.html">俄罗斯方块</a>
+    <a href="CA.html">元胞自动机</a>
+    -->
+    <a href="CA2.html">小游戏：元胞自动机</a>
+  </p>
+
+  <!-- Lightbox2 脚本（CDN） -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.4/js/lightbox-plus-jquery.min.js"></script>
+</body>
+</html>
+
